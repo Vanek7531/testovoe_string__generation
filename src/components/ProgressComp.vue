@@ -17,11 +17,10 @@ const generationRandomString = (limit) => {
     str += chrs.substring(pos, pos + 1);
   }
   stringsArray.value.push(str);
-  localStorage.setItem("stringsArray", JSON.stringify(stringsArray.value));
   if (stringsArray.value.length < limit) generationRandomString(limit);
-  else if (stringsArray.value.length < limit + 50) {
+  else if (stringsArray.value.length < limit + 500) {
     setTimeout(() => {
-      generationRandomString(limit + 50);
+      generationRandomString(limit + 500);
     }, 100);
   }
 };
@@ -46,16 +45,12 @@ const downLoad = () => {
     "data:application/txt;charset=utf-8," +
     encodeURIComponent(JSON.stringify(stringsArray.value));
   var link = document.createElement("a");
-  // If you don't know the name or want to use
-  // the webserver default set name = ''
   link.setAttribute("download", "strings");
   link.href = csvData;
   link.download = "text.txt";
   document.body.appendChild(link);
   link.click();
   link.remove();
-
-  // console.log("csvData", csvData);
 };
 
 const currentSearchVal = ref("");
@@ -79,29 +74,11 @@ const searchRes = (serachPagination) => {
   return searchResults.value;
 };
 
-const count = ref(0);
+window.onbeforeunload = function (event) {
+	return confirm();
 
-const filtered = stringsArray.value.filter(
-  function (item) {
-    if (count.value < 10 && item > 0) {
-      console.log("item", item);
-      count.value++;
-      return true;
-    }
-    return false;
-  },
-  { count: 0 }
-);
+};
 
-onMounted(() => {
-  stringsArray.value = localStorage.getItem("stringsArray")
-    ? JSON.parse(localStorage.getItem("stringsArray"))
-    : [];
-
-  if (stringsArray.value.length > 0)
-    generationRandomString(stringsArray.value.length + 50);
-  else generationRandomString(50);
-});
 
 watch(currentSearchVal, (newVal) => {
   console.log("newVal", newVal);
@@ -110,6 +87,7 @@ watch(currentSearchVal, (newVal) => {
 
 <template>
   <div>
+		<h2>Если вы обновите страницу и не сохраните сгенирированные строки, генеировать придется заново(единственный способ котрый я придумла как хранить 10кк строк)</h2>
     <div style="display: flex; gap: 10px; flex-direction: column">
       <div style="display: flex; gap: 10px">
         <input type="text" v-model="currentSearchVal" />
@@ -131,7 +109,7 @@ watch(currentSearchVal, (newVal) => {
     <div>прогресс: {{ progress }}</div>
     <br />
     <div
-      @click="generationRandomString(stringsArray.length + 50), (stop = false)"
+      @click="generationRandomString(stringsArray.length + 500), (stop = false)"
       style="
         cursor: pointer;
         padding: 10px;
@@ -151,13 +129,18 @@ watch(currentSearchVal, (newVal) => {
     >
       STOP
     </div>
-    <!-- <div @click="downLoad()">downLoad</div>
     <br />
-    <div @click="readFile()">readFile</div> -->
+    <div style="cursor: pointer" @click="downLoad()">
+      Сохранить текстовый файл со строками
+    </div>
+    <br />
+    <div @click="readFile()">Взять строки из файла и начать генерацию!</div>
     <br />
 
     <!-- <div><pre>{{ stringsArray }}</pre> - массив строк</div> -->
-    <!-- <input type="file" name="file" id="file" ref="fileTxt" /> -->
+    Добавте скаченный ранее файл если есть, если нет просто начните генерацию
+    выше
+    <input type="file" name="file" id="file" ref="fileTxt" />
   </div>
 </template>
 
