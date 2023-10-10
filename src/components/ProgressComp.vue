@@ -1,10 +1,10 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 const stringsArray = ref([]);
 const chrs = "abdehkmnpswxzABDEFGHKMNPQRSTWXZ123456789";
 const progress = computed(() => {
-  return `${(stringsArray.value.length / 100000).toFixed(2)}%`;
+  return `${(stringsArray.value.length / 100000).toFixed(3)}%`;
 });
 
 const stop = ref(false);
@@ -24,38 +24,6 @@ const generationRandomString = (limit) => {
       generationRandomString(limit + 50);
     }, 100);
   }
-};
-
-const fileTxt = ref();
-const text = ref();
-
-const readFile = () => {
-  let file = fileTxt.value.files[0];
-  console.log("fileTxt", file);
-  let reader = new FileReader();
-  reader.readAsText(file);
-  reader.onload = function () {
-    console.log(reader.result);
-    stringsArray.value = JSON.parse(reader.result);
-    console.log("stringsArray.value", stringsArray.value);
-  };
-};
-
-const downLoad = () => {
-  let csvData =
-    "data:application/txt;charset=utf-8," +
-    encodeURIComponent(JSON.stringify(stringsArray.value));
-  var link = document.createElement("a");
-  // If you don't know the name or want to use
-  // the webserver default set name = ''
-  link.setAttribute("download", "strings");
-  link.href = csvData;
-  link.download = "text.txt";
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-
-  // console.log("csvData", csvData);
 };
 
 const currentSearchVal = ref("");
@@ -79,20 +47,6 @@ const searchRes = (serachPagination) => {
   return searchResults.value;
 };
 
-const count = ref(0);
-
-const filtered = stringsArray.value.filter(
-  function (item) {
-    if (count.value < 10 && item > 0) {
-      console.log("item", item);
-      count.value++;
-      return true;
-    }
-    return false;
-  },
-  { count: 0 }
-);
-
 onMounted(() => {
   stringsArray.value = localStorage.getItem("stringsArray")
     ? JSON.parse(localStorage.getItem("stringsArray"))
@@ -101,10 +55,6 @@ onMounted(() => {
   if (stringsArray.value.length > 0)
     generationRandomString(stringsArray.value.length + 50);
   else generationRandomString(50);
-});
-
-watch(currentSearchVal, (newVal) => {
-  console.log("newVal", newVal);
 });
 </script>
 
@@ -151,13 +101,6 @@ watch(currentSearchVal, (newVal) => {
     >
       STOP
     </div>
-    <!-- <div @click="downLoad()">downLoad</div>
-    <br />
-    <div @click="readFile()">readFile</div> -->
-    <br />
-
-    <!-- <div><pre>{{ stringsArray }}</pre> - массив строк</div> -->
-    <!-- <input type="file" name="file" id="file" ref="fileTxt" /> -->
   </div>
 </template>
 
